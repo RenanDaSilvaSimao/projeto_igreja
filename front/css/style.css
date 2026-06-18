@@ -1,0 +1,165 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #f4f6f8;
+    color: #222;
+}
+
+.cabecalho {
+    background-color: #263238;
+    color: white;
+    text-align: center;
+    padding: 32px 20px;
+}
+
+.cabecalho h1 {
+    margin-bottom: 8px;
+    font-size: 32px;
+}
+
+.cabecalho p {
+    font-size: 16px;
+}
+
+.menu {
+    background-color: #37474f;
+    text-align: center;
+    padding: 14px;
+}
+
+.menu a {
+    color: white;
+    text-decoration: none;
+    margin: 0 14px;
+    font-weight: bold;
+}
+
+.menu a:hover {
+    text-decoration: underline;
+}
+
+.container {
+    width: 90%;
+    max-width: 1000px;
+    margin: 32px auto;
+}
+
+.boas-vindas {
+    background-color: white;
+    padding: 24px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.boas-vindas h2 {
+    margin-bottom: 10px;
+    font-size: 24px;
+}
+
+.boas-vindas p {
+    font-size: 16px;
+    color: #555;
+}
+
+.cards {
+    display: flex;
+    gap: 20px;
+}
+
+.card {
+    background-color: white;
+    padding: 24px;
+    border-radius: 8px;
+    flex: 1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.card h3 {
+    margin-bottom: 10px;
+    font-size: 22px;
+}
+
+.card p {
+    margin-bottom: 18px;
+    color: #555;
+    line-height: 1.4;
+}
+
+.card a {
+    display: inline-block;
+    background-color: #263238;
+    color: white;
+    padding: 10px 14px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.card a:hover {
+    background-color: #11191d;
+}
+
+@media (max-width: 700px) {
+    .cards {
+        flex-direction: column;
+    }
+
+    .menu a {
+        display: block;
+        margin: 8px 0;
+    }
+
+    .cabecalho h1 {
+        font-size: 26px;
+    }
+}
+
+
+
+.formulario {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.campo {
+    display: flex;
+    flex-direction: column;
+}
+
+.campo label {
+    margin-bottom: 6px;
+    font-weight: bold;
+}
+
+.campo input,
+.campo select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.formulario button {
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    background-color: #263238;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.formulario button:hover {
+    background-color: #11191d;
+}
+
+.mensagem {
+    margin-top: 16px;
+    font-weight: bold;
+}

@@ -1,0 +1,78 @@
+import * as service from "../services/membroService.js";
+import { criarMembroValido, atualizarMembro, validarLogin } from "../schemas/membro.js";
+
+export async function cadastrar(req,res,next){
+    try{
+        const dados = criarMembroValido.parse(req.body);
+        const cadastro = await service.cadastrar(dados);
+        return res.status(201).json(cadastro);
+
+    }catch(erro){
+        next(erro);
+    }
+}
+
+export async function listarTodos(req,res,next){
+    try{
+        const listagem = await service.listarTodos();
+        return res.status(200).json(listagem);
+    }catch(erro){
+        next(erro);
+    }
+}
+
+export async function buscarPorId(req,res,next){
+    try{
+        const id= Number(req.params.id);
+        const busca = await service.buscarPorId(id);
+        return res.status(200).json(busca);
+    }catch(erro){
+        next(erro);
+    }
+}
+
+export async function deletar(req,res,next){
+    try{
+        const id= Number(req.params.id);
+        const delet = await service.deletar(id);
+        return res.status(200).json(delet);
+    }catch(erro){
+        next(erro);
+    }
+}
+
+export async function atualizar(req,res,next){
+    try{
+        const id = Number(req.params.id);
+        const dados = atualizarMembro.parse(req.body);
+        const att = await service.atualizar(dados, id);
+        return res.status(200).json(att);
+    }catch(erro){
+        next(erro);
+    }
+}
+
+export async function login(req,res,next){
+    try{
+        const dados = validarLogin.parse(req.body);
+        const receberToken = await service.login(dados);
+        return res.status(200).json(receberToken);
+
+    }catch(erro){
+        next(erro);
+    }
+}
+
+export async function relatorio(req,res,next){
+    try{
+        const filtros = req.query;
+        if(filtros.ativo){
+        filtros.ativo = filtros.ativo==="true";
+        }
+        const cs = await service.buscarComFiltros(filtros);
+        return res.status(200).json(cs);
+    }catch(erro){
+        next(erro);
+    }
+}
+
