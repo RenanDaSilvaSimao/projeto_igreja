@@ -1,7 +1,7 @@
 import { ZodError } from "zod";
 export function capturarErro(erro, req,res,next){
     if(erro instanceof ZodError){
-        return res.status(400).json({erro: erro.message});
+        return res.status(400).json({erro: erro.errors.map(e=>e.message)});
     }
     if(erro.statusCode){
        return res.status(erro.statusCode).json({erro: erro.message});
