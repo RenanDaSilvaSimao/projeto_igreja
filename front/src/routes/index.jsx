@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
-import { Church } from "lucide-react"
+import { Church, Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -31,6 +31,10 @@ function LoginPage() {
     telefone: "",
   })
   const [carregandoCadastro, setCarregandoCadastro] = useState(false)
+
+  // Controla visibilidade das senhas
+  const [verSenhaLogin, setVerSenhaLogin] = useState(false)
+  const [verSenhaCadastro, setVerSenhaCadastro] = useState(false)
 
   const set = (campo, valor) => setForm((prev) => ({ ...prev, [campo]: valor }))
 
@@ -130,7 +134,12 @@ function LoginPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="senha">Senha</Label>
-                  <Input id="senha" type="password" value={senha} onChange={(e) => setSenha(e.target.value)} required />
+                  <div className="relative">
+                    <Input id="senha" type={verSenhaLogin ? "text" : "password"} value={senha} onChange={(e) => setSenha(e.target.value)} required className="pr-10" />
+                    <button type="button" onClick={() => setVerSenhaLogin((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                      {verSenhaLogin ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
                 </div>
                 <Button type="submit" className="w-full" size="lg" disabled={carregandoLogin}>
                   {carregandoLogin ? "Entrando..." : "Entrar"}
@@ -151,7 +160,12 @@ function LoginPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="c-senha">Senha</Label>
-                  <Input id="c-senha" type="password" required minLength={5} value={form.senha} onChange={(e) => set("senha", e.target.value)} />
+                  <div className="relative">
+                    <Input id="c-senha" type={verSenhaCadastro ? "text" : "password"} required minLength={5} value={form.senha} onChange={(e) => set("senha", e.target.value)} className="pr-10" />
+                    <button type="button" onClick={() => setVerSenhaCadastro((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                      {verSenhaCadastro ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
                 </div>
                 <div className="grid gap-3 grid-cols-2">
                   <div className="space-y-2">

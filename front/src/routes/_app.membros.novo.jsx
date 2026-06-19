@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router"
 import { useState } from "react"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -26,6 +26,7 @@ function NovoMembroPage() {
     telefone: "",        // 11 dígitos sem formatação: "11987654321"
   })
   const [carregando, setCarregando] = useState(false)
+  const [verSenha, setVerSenha] = useState(false)
 
   const onSubmit = async (e) => {
     e.preventDefault()
@@ -76,7 +77,12 @@ function NovoMembroPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="senha">Senha</Label>
-                <Input id="senha" type="password" required minLength={5} value={form.senha} onChange={(e) => set("senha", e.target.value)} />
+                <div className="relative">
+                  <Input id="senha" type={verSenha ? "text" : "password"} required minLength={5} value={form.senha} onChange={(e) => set("senha", e.target.value)} className="pr-10" />
+                  <button type="button" onClick={() => setVerSenha((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                    {verSenha ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
             </div>
 
