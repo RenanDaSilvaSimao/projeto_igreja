@@ -12,7 +12,7 @@ export async function enviarAprovacaoLider({ nome, email, token }) {
   const linkNegar   = `${BACKEND_URL}/membros/negar/${token}`
 
   await resend.emails.send({
-    from: "Igreja Graça & Paz <onboarding@resend.dev>",
+    from: "AD Fogo Para As Nações <onboarding@resend.dev>",
     to:   "renan.simao360@gmail.com",
     subject: `Novo Líder aguardando aprovação — ${nome}`,
     html: `
