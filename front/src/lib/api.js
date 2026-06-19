@@ -15,7 +15,15 @@ function headersAuth() {
 // Usa .text() primeiro para evitar erro em respostas com body vazio
 async function tratarResposta(resposta) {
   const texto = await resposta.text()
-  const dados = texto ? JSON.parse(texto) : {}
+
+  // Se o servidor retornar HTML em vez de JSON (ex: Railway fora do ar, URL errada),
+  // JSON.parse vai quebrar — capturamos isso e devolvemos uma mensagem amigável
+  let dados = {}
+  try {
+    dados = texto ? JSON.parse(texto) : {}
+  } catch {
+    throw new Error(`Servidor indisponível (código ${resposta.status})`)
+  }
 
   if (!resposta.ok) {
     throw new Error(dados.mensagem || `Erro ${resposta.status}`)
