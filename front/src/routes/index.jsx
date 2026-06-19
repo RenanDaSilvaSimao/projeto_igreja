@@ -82,13 +82,13 @@ function LoginPage() {
       <div className="hidden lg:flex flex-col justify-between p-12 bg-sidebar text-sidebar-foreground relative overflow-hidden">
         <div
           className="absolute inset-0 opacity-20"
-          style={{ background: "radial-gradient(circle at 20% 30%, oklch(0.78 0.11 75 / 0.5), transparent 50%), radial-gradient(circle at 80% 70%, oklch(0.42 0.09 160 / 0.5), transparent 50%)" }}
+          style={{ background: "radial-gradient(circle at 20% 30%, oklch(0.63 0.22 42 / 0.5), transparent 50%), radial-gradient(circle at 80% 70%, oklch(0.84 0.17 88 / 0.4), transparent 50%)" }}
         />
         <div className="relative flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
             <Church className="h-5 w-5" />
           </div>
-          <span className="font-display text-xl">Graça & Paz</span>
+          <span className="font-display text-xl">AD Fogo Para As Nações</span>
         </div>
         <div className="relative space-y-4">
           <h1 className="font-display text-5xl leading-tight">
@@ -99,7 +99,7 @@ function LoginPage() {
           </p>
         </div>
         <div className="relative text-xs text-sidebar-foreground/50">
-          © {new Date().getFullYear()} Igreja Graça & Paz
+          © {new Date().getFullYear()} AD Fogo Para As Nações
         </div>
       </div>
 

@@ -41,7 +41,7 @@ export function AppSidebar() {
             <Church className="h-5 w-5" />
           </div>
           <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-            <span className="font-display text-base leading-tight">Graça & Paz</span>
+            <span className="font-display text-base leading-tight">AD Fogo Para As Nações</span>
             <span className="text-xs text-sidebar-foreground/60">Gestão Eclesiástica</span>
           </div>
         </div>
