@@ -1,13 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
-import { Search, UserPlus, Trash2 } from "lucide-react"
+import { Search, UserPlus, Trash2, UserX, UserCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { toast } from "sonner"
-import { listarMembros, deletarMembro } from "@/lib/api"
+import { listarMembros, deletarMembro, alternarAtivo } from "@/lib/api"
 
 export const Route = createFileRoute("/_app/membros")({
   component: MembrosPage,
@@ -36,6 +36,17 @@ function MembrosPage() {
       m.email.toLowerCase().includes(q.toLowerCase()) ||
       m.cargo.toLowerCase().includes(q.toLowerCase()),
   )
+
+  const handleAlternarAtivo = async (id, ativoAtual) => {
+    const novoAtivo = !ativoAtual
+    try {
+      await alternarAtivo(id, novoAtivo)
+      setMembros((prev) => prev.map((m) => m.id === id ? { ...m, ativo: novoAtivo } : m))
+      toast.success(novoAtivo ? "Membro reativado." : "Membro pausado.")
+    } catch (e) {
+      toast.error(e.message)
+    }
+  }
 
   // Remove um membro e atualiza a lista sem recarregar a página
   const handleDeletar = async (id, nome) => {
@@ -121,13 +132,25 @@ function MembrosPage() {
                     </TableCell>
                     <TableCell>
                       {cargo === "Líder" && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDeletar(m.id, m.nome)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title={m.ativo ? "Pausar membro" : "Reativar membro"}
+                            onClick={() => handleAlternarAtivo(m.id, m.ativo)}
+                          >
+                            {m.ativo
+                              ? <UserX className="h-4 w-4 text-orange-500" />
+                              : <UserCheck className="h-4 w-4 text-green-600" />}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeletar(m.id, m.nome)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
                       )}
                     </TableCell>
                   </TableRow>

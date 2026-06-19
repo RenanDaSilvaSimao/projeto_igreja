@@ -95,6 +95,12 @@ export async function buscarPorId(id){
     return busca;
 }
 
+export async function alternarAtivo(id, ativo){
+    const busca = await repository.buscarPorId(id);
+    if(!busca) throw new NaoEncontrado("membro não encontrado");
+    return repository.atualizarAtivo(id, ativo);
+}
+
 export async function deletar(id){
     // Remove as presenças do membro antes de deletá-lo
     // (evita erro de foreign key constraint na tabela presencas)

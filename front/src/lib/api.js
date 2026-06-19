@@ -114,6 +114,16 @@ export async function deletarEvento(id) {
   return tratarResposta(resposta)
 }
 
+// Alterna status ativo/inativo de um membro — PATCH /membros/:id/ativo
+export async function alternarAtivo(id, ativo) {
+  const resposta = await fetch(`${BASE_URL}/membros/${id}/ativo`, {
+    method: "PATCH",
+    headers: headersAuth(),
+    body: JSON.stringify({ ativo }),
+  })
+  return tratarResposta(resposta)
+}
+
 // ─── PRESENÇAS ────────────────────────────────────────────────────────────────
 
 // Confirma presença no evento — POST /eventos/:id/presencas

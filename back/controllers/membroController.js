@@ -1,5 +1,5 @@
 import * as service from "../services/membroService.js";
-import { criarMembroValido, atualizarMembro, validarLogin } from "../schemas/membro.js";
+import { criarMembroValido, atualizarMembro, validarLogin, alterarAtivoValido } from "../schemas/membro.js";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
 
@@ -100,6 +100,17 @@ export async function negar(req, res, next) {
         if (erro.name === "JsonWebTokenError" || erro.name === "TokenExpiredError") {
             return res.status(400).send(`<!DOCTYPE html><html><body style="font-family:sans-serif;text-align:center;padding:60px"><h1>Link inválido ou expirado</h1></body></html>`);
         }
+        next(erro);
+    }
+}
+
+export async function alternarAtivo(req, res, next) {
+    try {
+        const id = Number(req.params.id);
+        const { ativo } = alterarAtivoValido.parse(req.body);
+        const resultado = await service.alternarAtivo(id, ativo);
+        return res.status(200).json(resultado);
+    } catch (erro) {
         next(erro);
     }
 }

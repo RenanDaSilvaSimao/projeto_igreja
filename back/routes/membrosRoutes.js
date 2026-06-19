@@ -1,6 +1,7 @@
 import {Router} from "express";
 import * as controller from "../controllers/membroController.js";
 import { verificarToken } from "../middlewares/autenticacao.js";
+import { verificarLider } from "../middlewares/verificarLider.js";
 
 const router = Router();
 
@@ -11,7 +12,8 @@ router.get("/membros/aprovar/:token", controller.aprovar);
 router.get("/membros/negar/:token", controller.negar);
 router.get("/membros/:id", verificarToken, controller.buscarPorId);
 router.post("/membros", controller.cadastrar);
-router.delete("/membros/:id", verificarToken, controller.deletar);
+router.delete("/membros/:id", verificarToken, verificarLider, controller.deletar);
+router.patch("/membros/:id/ativo", verificarToken, verificarLider, controller.alternarAtivo);
 router.patch("/membros/:id", verificarToken, controller.atualizar);
 router.post("/membros/login", controller.login);
 

@@ -24,3 +24,7 @@ export const validarLogin = z.object({
 })
 
 export const atualizarMembro = criarMembroValido.partial();
+
+export const alterarAtivoValido = z.object({
+    ativo: z.boolean()
+});

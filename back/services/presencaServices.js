@@ -1,9 +1,15 @@
 import * as presenca from "../repositories/presencasRepository.js";
 import * as err from "../middlewares/errosCustomizados.js";
 import * as rep from "../repositories/eventoRepository.js";
+import * as membroRepository from "../repositories/membroRepository.js";
 
 
 export async function confirmarPresenca(evento_id, membro_id){
+    const membro = await membroRepository.buscarPorId(membro_id);
+    if(!membro || !membro.ativo){
+        throw new err.NaoAutorizado("Conta inativa — não é possível confirmar presença");
+    }
+
     const busca = await presenca.buscarPresenca(evento_id,membro_id);
     if(busca){
         throw new err.DadoDuplicado("Presenca já confirmada");

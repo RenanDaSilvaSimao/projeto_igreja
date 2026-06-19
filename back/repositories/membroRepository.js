@@ -16,6 +16,11 @@ export async function ativar(id){
     return conexao.rows[0];
 }
 
+export async function atualizarAtivo(id, ativo){
+    const conexao = await pool.query("UPDATE membros SET ativo = $1 WHERE id = $2 RETURNING *;", [ativo, id]);
+    return conexao.rows[0];
+}
+
 export async function listarTodos(){
     const listagem = await pool.query("SELECT * FROM membros;");
     return listagem.rows;
