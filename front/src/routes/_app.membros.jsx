@@ -18,6 +18,9 @@ function MembrosPage() {
   const [carregando, setCarregando] = useState(true)
   const [q, setQ] = useState("") // texto de busca
 
+  // Lê o cargo salvo no login — só Líder vê o botão de remover
+  const cargo = localStorage.getItem("cargo")
+
   // Busca os membros do back-end quando a página carrega
   useEffect(() => {
     listarMembros()
@@ -117,13 +120,15 @@ function MembrosPage() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeletar(m.id, m.nome)}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+                      {cargo === "Líder" && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeletar(m.id, m.nome)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
