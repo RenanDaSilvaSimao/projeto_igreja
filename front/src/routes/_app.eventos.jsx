@@ -175,8 +175,8 @@ function EventosPage() {
           {eventos.map((e) => {
             const data = new Date(e.data_evento)
             const dataValida = !isNaN(data)
-            // Evento passado = data do evento já ficou para trás
             const jaPassou = dataValida && data < new Date()
+            const limiteAtingido = e.limite_membros && e.total_presencas >= e.limite_membros
 
             return (
               <Card key={e.id} className="overflow-hidden hover:shadow-md transition-shadow">
@@ -237,29 +237,30 @@ function EventosPage() {
                         </div>
                       </div>
 
-                      {/* Botão de presença — só aparece se o evento ainda não passou */}
-                      {!jaPassou && (
+                      {/* Status / botão de presença */}
+                      {jaPassou ? (
+                        <p className="text-xs text-muted-foreground italic pt-1">Tempo esgotado</p>
+                      ) : e.eu_confirmei ? (
                         <div className="pt-1">
-                          {e.eu_confirmei ? (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-green-600 border-green-600 hover:bg-green-50 hover:text-green-700"
-                              onClick={() => onCancelarPresenca(e.id)}
-                            >
-                              <XCircle className="h-3.5 w-3.5 mr-1.5" />
-                              Cancelar presença
-                            </Button>
-                          ) : (
-                            <Button size="sm" onClick={() => onConfirmarPresenca(e.id)}>
-                              <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
-                              Confirmar presença
-                            </Button>
-                          )}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-green-600 border-green-600 hover:bg-green-50 hover:text-green-700"
+                            onClick={() => onCancelarPresenca(e.id)}
+                          >
+                            <XCircle className="h-3.5 w-3.5 mr-1.5" />
+                            Cancelar presença
+                          </Button>
                         </div>
-                      )}
-                      {jaPassou && (
-                        <p className="text-xs text-muted-foreground italic pt-1">Evento encerrado</p>
+                      ) : limiteAtingido ? (
+                        <p className="text-xs text-muted-foreground italic pt-1">Limite atingido</p>
+                      ) : (
+                        <div className="pt-1">
+                          <Button size="sm" onClick={() => onConfirmarPresenca(e.id)}>
+                            <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+                            Confirmar presença
+                          </Button>
+                        </div>
                       )}
                     </div>
                   </div>
