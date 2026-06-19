@@ -113,3 +113,23 @@ export async function deletarEvento(id) {
   })
   return tratarResposta(resposta)
 }
+
+// ─── PRESENÇAS ────────────────────────────────────────────────────────────────
+
+// Confirma presença no evento — POST /eventos/:id/presencas
+export async function confirmarPresenca(eventoId) {
+  const resposta = await fetch(`${BASE_URL}/eventos/${eventoId}/presencas`, {
+    method: "POST",
+    headers: headersAuth(),
+  })
+  return tratarResposta(resposta)
+}
+
+// Cancela presença no evento — DELETE /eventos/:id/presencas
+export async function cancelarPresenca(eventoId) {
+  const resposta = await fetch(`${BASE_URL}/eventos/${eventoId}/presencas`, {
+    method: "DELETE",
+    headers: headersAuth(),
+  })
+  return tratarResposta(resposta)
+}

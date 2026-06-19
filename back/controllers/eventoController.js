@@ -14,7 +14,7 @@ export async function buscarPorId(req,res,next){
 
 export async function listarTodos(req,res,next){
     try{
-        const listagem = await service.listarTodos();
+        const listagem = await service.listarTodos(req.usuario.id);
         return res.status(200).json(listagem);
     }catch(err){
         next(err);

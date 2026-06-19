@@ -16,8 +16,8 @@ export async function criarEvento(dados){
     return conexao;
 }
 
-export async function listarTodos(){
-    const conexao = await repository.buscarTodos();
+export async function listarTodos(membro_id){
+    const conexao = await repository.buscarTodos(membro_id);
     return conexao;
 }
 

@@ -50,8 +50,17 @@ export async function buscarPorId(id){
     return conexao.rows[0];
 }
 
-export async function buscarTodos(){
-    const conexao = await pool.query("SELECT * FROM eventos;");
+export async function buscarTodos(membro_id){
+    const conexao = await pool.query(`
+        SELECT
+            e.*,
+            COUNT(p.membro_id)::int AS total_presencas,
+            COALESCE(BOOL_OR(p.membro_id = $1), false) AS eu_confirmei
+        FROM eventos e
+        LEFT JOIN presencas p ON p.evento_id = e.id
+        GROUP BY e.id
+        ORDER BY e.data_evento ASC
+    `, [membro_id]);
     return conexao.rows;
 }
 

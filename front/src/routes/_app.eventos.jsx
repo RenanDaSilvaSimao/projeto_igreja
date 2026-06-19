@@ -1,13 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
-import { Calendar, MapPin, Users as UsersIcon, Plus, Trash2 } from "lucide-react"
+import { Calendar, MapPin, Users as UsersIcon, Plus, Trash2, CheckCircle2, XCircle } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { toast } from "sonner"
-import { listarEventos, cadastrarEvento, deletarEvento } from "@/lib/api"
+import { listarEventos, cadastrarEvento, deletarEvento, confirmarPresenca, cancelarPresenca } from "@/lib/api"
 
 export const Route = createFileRoute("/_app/eventos")({
   component: EventosPage,
@@ -18,13 +18,13 @@ function EventosPage() {
   const [carregando, setCarregando] = useState(true)
   const [modalAberto, setModalAberto] = useState(false)
 
-  // Lê o cargo salvo no login — só Líder vê o botão de remover
+  // Lê o cargo salvo no login — Líder cria/remove; demais apenas confirmam presença
   const cargo = localStorage.getItem("cargo")
 
   // Estado do formulário de novo evento
   const [form, setForm] = useState({
     nome_evento: "",
-    data_evento: "", // input datetime-local retorna "YYYY-MM-DDTHH:mm" — convertemos antes de enviar
+    data_evento: "",
     local_evento: "",
     limite_membros: "",
   })
@@ -39,6 +39,13 @@ function EventosPage() {
   }, [])
 
   const set = (campo, valor) => setForm((prev) => ({ ...prev, [campo]: valor }))
+
+  // Datetime mínimo para o input — agora, convertido para o fuso local do browser
+  // toISOString() usa UTC; subtraímos o offset para obter a hora local
+  const agora = new Date()
+  const minDatetime = new Date(agora.getTime() - agora.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 16)
 
   const onRemoverEvento = async (id) => {
     if (!window.confirm("Remover este evento?")) return
@@ -57,16 +64,14 @@ function EventosPage() {
     try {
       const dados = {
         nome_evento: form.nome_evento,
-        // datetime-local retorna "YYYY-MM-DDTHH:mm" mas o back-end espera "YYYY-MM-DD HH:MM"
-        // substituímos o "T" por espaço
         data_evento: form.data_evento.replace("T", " "),
         local_evento: form.local_evento,
       }
-      // limite_membros é opcional — só inclui se preenchido
       if (form.limite_membros) dados.limite_membros = Number(form.limite_membros)
 
       const novoEvento = await cadastrarEvento(dados)
-      setEventos((prev) => [novoEvento, ...prev]) // adiciona no topo da lista
+      // Novo evento começa sem presenças e o Líder ainda não confirmou
+      setEventos((prev) => [{ ...novoEvento, total_presencas: 0, eu_confirmei: false }, ...prev])
       toast.success("Evento criado!")
       setModalAberto(false)
       setForm({ nome_evento: "", data_evento: "", local_evento: "", limite_membros: "" })
@@ -74,6 +79,38 @@ function EventosPage() {
       toast.error(erro.message)
     } finally {
       setSalvando(false)
+    }
+  }
+
+  const onConfirmarPresenca = async (eventoId) => {
+    try {
+      await confirmarPresenca(eventoId)
+      setEventos((prev) =>
+        prev.map((e) =>
+          e.id === eventoId
+            ? { ...e, eu_confirmei: true, total_presencas: (e.total_presencas || 0) + 1 }
+            : e
+        )
+      )
+      toast.success("Presença confirmada!")
+    } catch (erro) {
+      toast.error(erro.message)
+    }
+  }
+
+  const onCancelarPresenca = async (eventoId) => {
+    try {
+      await cancelarPresenca(eventoId)
+      setEventos((prev) =>
+        prev.map((e) =>
+          e.id === eventoId
+            ? { ...e, eu_confirmei: false, total_presencas: Math.max(0, (e.total_presencas || 1) - 1) }
+            : e
+        )
+      )
+      toast.success("Presença cancelada.")
+    } catch (erro) {
+      toast.error(erro.message)
     }
   }
 
@@ -85,42 +122,50 @@ function EventosPage() {
           <p className="text-muted-foreground">Encontros, cultos e atividades.</p>
         </div>
 
-        {/* Botão que abre o modal de criação */}
-        <Dialog open={modalAberto} onOpenChange={setModalAberto}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4" /> Novo evento
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Criar evento</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={onCriarEvento} className="space-y-4 mt-2">
-              <div className="space-y-2">
-                <Label>Nome do evento</Label>
-                <Input required value={form.nome_evento} onChange={(e) => set("nome_evento", e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Data e hora</Label>
-                {/* datetime-local é o input nativo do browser para data + hora juntos */}
-                <Input type="datetime-local" required value={form.data_evento} onChange={(e) => set("data_evento", e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Local</Label>
-                <Input required value={form.local_evento} onChange={(e) => set("local_evento", e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Limite de membros <span className="text-muted-foreground text-xs">(opcional)</span></Label>
-                <Input type="number" min="1" value={form.limite_membros} onChange={(e) => set("limite_membros", e.target.value)} />
-              </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <Button type="button" variant="outline" onClick={() => setModalAberto(false)}>Cancelar</Button>
-                <Button type="submit" disabled={salvando}>{salvando ? "Criando..." : "Criar evento"}</Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+        {/* Botão de criar evento — apenas Líderes veem */}
+        {cargo === "Líder" && (
+          <Dialog open={modalAberto} onOpenChange={setModalAberto}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4" /> Novo evento
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Criar evento</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={onCriarEvento} className="space-y-4 mt-2">
+                <div className="space-y-2">
+                  <Label>Nome do evento</Label>
+                  <Input required value={form.nome_evento} onChange={(e) => set("nome_evento", e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Data e hora</Label>
+                  {/* min impede selecionar data/hora passada diretamente no browser */}
+                  <Input
+                    type="datetime-local"
+                    required
+                    min={minDatetime}
+                    value={form.data_evento}
+                    onChange={(e) => set("data_evento", e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Local</Label>
+                  <Input required value={form.local_evento} onChange={(e) => set("local_evento", e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Limite de membros <span className="text-muted-foreground text-xs">(opcional)</span></Label>
+                  <Input type="number" min="1" value={form.limite_membros} onChange={(e) => set("limite_membros", e.target.value)} />
+                </div>
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button type="button" variant="outline" onClick={() => setModalAberto(false)}>Cancelar</Button>
+                  <Button type="submit" disabled={salvando}>{salvando ? "Criando..." : "Criar evento"}</Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
 
       {carregando ? (
@@ -128,9 +173,10 @@ function EventosPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {eventos.map((e) => {
-            // data_evento vem como string do banco — tentamos parsear para exibir formatado
             const data = new Date(e.data_evento)
             const dataValida = !isNaN(data)
+            // Evento passado = data do evento já ficou para trás
+            const jaPassou = dataValida && data < new Date()
 
             return (
               <Card key={e.id} className="overflow-hidden hover:shadow-md transition-shadow">
@@ -155,7 +201,6 @@ function EventosPage() {
                     <div className="flex-1 p-5 space-y-3">
                       <div className="flex items-start justify-between gap-2">
                         <h3 className="font-bold text-xl leading-tight">{e.nome_evento}</h3>
-                        {/* Botão de remover — visível apenas para Líderes */}
                         {cargo === "Líder" && (
                           <Button
                             variant="ghost"
@@ -167,24 +212,55 @@ function EventosPage() {
                           </Button>
                         )}
                       </div>
+
                       <div className="space-y-1.5 text-sm text-muted-foreground">
                         {dataValida && (
                           <div className="flex items-center gap-2">
                             <Calendar className="h-3.5 w-3.5" />
-                            <span>{data.toLocaleDateString("pt-BR", { weekday: "long" })} · {data.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
+                            <span>
+                              {data.toLocaleDateString("pt-BR", { weekday: "long" })} ·{" "}
+                              {data.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                            </span>
                           </div>
                         )}
                         <div className="flex items-center gap-2">
                           <MapPin className="h-3.5 w-3.5" />
                           <span>{e.local_evento}</span>
                         </div>
-                        {e.limite_membros && (
-                          <div className="flex items-center gap-2">
-                            <UsersIcon className="h-3.5 w-3.5" />
-                            <span>Limite: {e.limite_membros} participantes</span>
-                          </div>
-                        )}
+                        {/* Contagem de presenças confirmadas */}
+                        <div className="flex items-center gap-2">
+                          <UsersIcon className="h-3.5 w-3.5" />
+                          <span>
+                            {e.total_presencas || 0} confirmado{e.total_presencas !== 1 ? "s" : ""}
+                            {e.limite_membros ? ` / ${e.limite_membros}` : ""}
+                          </span>
+                        </div>
                       </div>
+
+                      {/* Botão de presença — só aparece se o evento ainda não passou */}
+                      {!jaPassou && (
+                        <div className="pt-1">
+                          {e.eu_confirmei ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-green-600 border-green-600 hover:bg-green-50 hover:text-green-700"
+                              onClick={() => onCancelarPresenca(e.id)}
+                            >
+                              <XCircle className="h-3.5 w-3.5 mr-1.5" />
+                              Cancelar presença
+                            </Button>
+                          ) : (
+                            <Button size="sm" onClick={() => onConfirmarPresenca(e.id)}>
+                              <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+                              Confirmar presença
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                      {jaPassou && (
+                        <p className="text-xs text-muted-foreground italic pt-1">Evento encerrado</p>
+                      )}
                     </div>
                   </div>
                 </CardContent>
