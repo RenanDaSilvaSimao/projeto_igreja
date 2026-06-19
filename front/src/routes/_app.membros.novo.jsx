@@ -89,6 +89,9 @@ function NovoMembroPage() {
                     <SelectItem value="Membro">Membro</SelectItem>
                     <SelectItem value="Líder">Líder</SelectItem>
                     <SelectItem value="Diácono">Diácono</SelectItem>
+                    <SelectItem value="Ancião">Ancião</SelectItem>
+                    <SelectItem value="Encarregado">Encarregado</SelectItem>
+                    <SelectItem value="Porteiro">Porteiro</SelectItem>
                     <SelectItem value="Pastor">Pastor</SelectItem>
                   </SelectContent>
                 </Select>

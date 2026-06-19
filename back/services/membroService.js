@@ -89,6 +89,11 @@ export async function login(dados){
         throw new NaoEncontrado("membro não cadastrado");
     }
 
+    // Líder recém-cadastrado fica inativo até aprovação do admin
+    if(!busca.ativo){
+        throw new NaoAutorizado("Conta aguardando aprovação do administrador");
+    }
+
     const compararSenha = await bcrypt.compare(dados.senha, busca.senha);
 
     if(!compararSenha){

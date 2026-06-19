@@ -55,7 +55,6 @@ function LoginPage() {
     }
   }
 
-  // Cadastra o membro e já faz login automático com as mesmas credenciais
   const onCadastrar = async (e) => {
     e.preventDefault()
     setCarregandoCadastro(true)
@@ -63,10 +62,15 @@ function LoginPage() {
       const dados = { ...form }
       if (!dados.telefone) delete dados.telefone
 
-      // 1. Cria o membro no banco
       await cadastrarMembro(dados)
 
-      // 2. Faz login automático com as credenciais recém-cadastradas
+      // Líderes precisam de aprovação — não tenta logar, mostra aviso
+      if (form.cargo === "Líder") {
+        toast.success("Conta criada! Aguarde a aprovação do administrador por e-mail.")
+        return
+      }
+
+      // Outros cargos entram automaticamente
       toast.success("Conta criada! Entrando...")
       await fazerLogin(form.email, form.senha)
     } catch (erro) {
@@ -158,6 +162,9 @@ function LoginPage() {
                         <SelectItem value="Membro">Membro</SelectItem>
                         <SelectItem value="Líder">Líder</SelectItem>
                         <SelectItem value="Diácono">Diácono</SelectItem>
+                        <SelectItem value="Ancião">Ancião</SelectItem>
+                        <SelectItem value="Encarregado">Encarregado</SelectItem>
+                        <SelectItem value="Porteiro">Porteiro</SelectItem>
                         <SelectItem value="Pastor">Pastor</SelectItem>
                       </SelectContent>
                     </Select>
