@@ -1,4 +1,5 @@
 import * as repository from "../repositories/membroRepository.js";
+import * as presencasRepository from "../repositories/presencasRepository.js";
 import { DadoDuplicado, NaoAutorizado, NaoEncontrado } from "../middlewares/errosCustomizados.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -95,6 +96,10 @@ export async function buscarPorId(id){
 }
 
 export async function deletar(id){
+    // Remove as presenças do membro antes de deletá-lo
+    // (evita erro de foreign key constraint na tabela presencas)
+    await presencasRepository.deletarPorMembro(id);
+
     const del = await repository.deletar(id);
     if(!del){
         throw new NaoEncontrado("membro para deletar não encontrado");

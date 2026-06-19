@@ -28,3 +28,7 @@ export async function listarPresencas(evento_id){
     return conexao.rows;
 }
 
+export async function deletarPorMembro(membro_id){
+    await pool.query("DELETE FROM presencas WHERE membro_id = $1;", [membro_id]);
+}
+
