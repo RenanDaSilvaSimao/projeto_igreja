@@ -3,7 +3,7 @@ import { DadoDuplicado, NaoAutorizado, NaoEncontrado } from "../middlewares/erro
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
-import { th } from "zod/v4/locales";
+import { enviarAprovacaoLider } from "../lib/email.js";
 
 export async function cadastrar(dados){
 
@@ -16,11 +16,28 @@ export async function cadastrar(dados){
 
     const newDados = {
         ...dados,
-        senha: senhaHash
+        senha: senhaHash,
+        // Líderes começam inativos — precisam de aprovação do admin
+        ativo: dados.cargo === "Líder" ? false : true,
     }
 
     const conexao = await repository.cadastrar(newDados);
+
+    // Se for Líder, dispara e-mail de aprovação sem bloquear a resposta
+    if (dados.cargo === "Líder") {
+        const tokenAprovacao = jwt.sign({ id: conexao.id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+        enviarAprovacaoLider({ nome: dados.nome, email: dados.email, token: tokenAprovacao })
+            .catch((err) => console.error("Erro ao enviar e-mail de aprovação:", err));
+    }
+
     return conexao;
+}
+
+// Ativa um Líder após aprovação via link no e-mail
+export async function aprovarLider(id){
+    const membro = await repository.buscarPorId(id);
+    if(!membro) throw new NaoEncontrado("Membro não encontrado");
+    return repository.ativar(id);
 }
 
 export async function atualizar(dados, id){

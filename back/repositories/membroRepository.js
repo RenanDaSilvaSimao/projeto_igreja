@@ -1,11 +1,19 @@
 import {pool} from "../db.js";
 
 export async function cadastrar(dados){
-    const insercao = await pool.query("INSERT INTO membros (nome,email,senha,cargo,data_nascimento,telefone) VALUES ($1,$2,$3,$4,$5,$6) RETURNING*;",
-        [dados.nome,dados.email,dados.senha,dados.cargo,dados.data_nascimento,dados.telefone]
+    // ativo pode vir como false para Líderes que precisam de aprovação
+    const insercao = await pool.query(
+        "INSERT INTO membros (nome,email,senha,cargo,data_nascimento,telefone,ativo) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *;",
+        [dados.nome, dados.email, dados.senha, dados.cargo, dados.data_nascimento, dados.telefone, dados.ativo ?? true]
     );
 
     return insercao.rows[0];
+}
+
+// Ativa um membro que estava aguardando aprovação
+export async function ativar(id){
+    const conexao = await pool.query("UPDATE membros SET ativo = true WHERE id = $1 RETURNING *;", [id]);
+    return conexao.rows[0];
 }
 
 export async function listarTodos(){
