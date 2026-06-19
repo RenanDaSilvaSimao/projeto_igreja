@@ -42,7 +42,7 @@ function AppLayout() {
                 Voltar
               </Button>
             )}
-            <div className="ml-auto text-sm text-muted-foreground">Igreja Graça & Paz</div>
+            <div className="ml-auto text-sm text-muted-foreground">AD Fogo Para As Nações</div>
           </header>
 
           {/* Conteúdo da página atual — Outlet renderiza a rota filha */}
