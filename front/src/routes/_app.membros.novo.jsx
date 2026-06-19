@@ -28,6 +28,11 @@ function NovoMembroPage() {
   const [carregando, setCarregando] = useState(false)
   const [verSenha, setVerSenha] = useState(false)
 
+  // Limites dinâmicos recalculados a cada renderização com base no dia atual
+  const hoje = new Date()
+  const minNasc = new Date(hoje.getFullYear() - 120, hoje.getMonth(), hoje.getDate()).toISOString().split("T")[0]
+  const maxNasc = new Date(hoje.getFullYear() + 1, hoje.getMonth(), hoje.getDate()).toISOString().split("T")[0]
+
   const onSubmit = async (e) => {
     e.preventDefault()
     setCarregando(true)
@@ -105,7 +110,7 @@ function NovoMembroPage() {
               <div className="space-y-2">
                 <Label htmlFor="data_nascimento">Data de nascimento</Label>
                 {/* type="date" retorna string no formato YYYY-MM-DD — exatamente o que o back-end espera */}
-                <Input id="data_nascimento" type="date" required value={form.data_nascimento} onChange={(e) => set("data_nascimento", e.target.value)} />
+                <Input id="data_nascimento" type="date" required min={minNasc} max={maxNasc} value={form.data_nascimento} onChange={(e) => set("data_nascimento", e.target.value)} />
               </div>
             </div>
 
