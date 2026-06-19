@@ -1,13 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
-import { Calendar, MapPin, Users as UsersIcon, Plus } from "lucide-react"
+import { Calendar, MapPin, Users as UsersIcon, Plus, Trash2 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { toast } from "sonner"
-import { listarEventos, cadastrarEvento } from "@/lib/api"
+import { listarEventos, cadastrarEvento, deletarEvento } from "@/lib/api"
 
 export const Route = createFileRoute("/_app/eventos")({
   component: EventosPage,
@@ -17,6 +17,9 @@ function EventosPage() {
   const [eventos, setEventos] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [modalAberto, setModalAberto] = useState(false)
+
+  // Lê o cargo salvo no login — só Líder vê o botão de remover
+  const cargo = localStorage.getItem("cargo")
 
   // Estado do formulário de novo evento
   const [form, setForm] = useState({
@@ -36,6 +39,17 @@ function EventosPage() {
   }, [])
 
   const set = (campo, valor) => setForm((prev) => ({ ...prev, [campo]: valor }))
+
+  const onRemoverEvento = async (id) => {
+    if (!window.confirm("Remover este evento?")) return
+    try {
+      await deletarEvento(id)
+      setEventos((prev) => prev.filter((e) => e.id !== id))
+      toast.success("Evento removido.")
+    } catch (erro) {
+      toast.error(erro.message)
+    }
+  }
 
   const onCriarEvento = async (e) => {
     e.preventDefault()
@@ -139,7 +153,20 @@ function EventosPage() {
 
                     {/* Detalhes do evento */}
                     <div className="flex-1 p-5 space-y-3">
-                      <h3 className="font-bold text-xl leading-tight">{e.nome_evento}</h3>
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="font-bold text-xl leading-tight">{e.nome_evento}</h3>
+                        {/* Botão de remover — visível apenas para Líderes */}
+                        {cargo === "Líder" && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive hover:text-destructive shrink-0"
+                            onClick={() => onRemoverEvento(e.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                       <div className="space-y-1.5 text-sm text-muted-foreground">
                         {dataValida && (
                           <div className="flex items-center gap-2">

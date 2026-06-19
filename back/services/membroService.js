@@ -80,7 +80,8 @@ export async function login(dados){
 
     const token = jwt.sign({id: busca.id}, process.env.JWT_SECRET, {expiresIn: "7d"});
 
-    return token;
+    // Retorna o token E o cargo para o front-end saber as permissões do usuário
+    return { token, cargo: busca.cargo };
 }
 
 export async function buscarComFiltros(filtros){

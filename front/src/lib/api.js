@@ -104,3 +104,12 @@ export async function cadastrarEvento(dados) {
   })
   return tratarResposta(resposta)
 }
+
+// Remove um evento — DELETE /eventos/:id
+export async function deletarEvento(id) {
+  const resposta = await fetch(`${BASE_URL}/eventos/${id}`, {
+    method: "DELETE",
+    headers: headersAuth(),
+  })
+  return tratarResposta(resposta)
+}

@@ -29,6 +29,7 @@ export function AppSidebar() {
   // Remove o token e redireciona para o login
   const handleLogout = () => {
     localStorage.removeItem("token")
+    localStorage.removeItem("cargo")
     navigate({ to: "/" })
   }
 

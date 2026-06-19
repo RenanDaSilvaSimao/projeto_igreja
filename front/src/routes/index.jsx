@@ -37,7 +37,9 @@ function LoginPage() {
   // Faz login e redireciona para o painel
   const fazerLogin = async (emailParam, senhaParam) => {
     const dados = await login(emailParam, senhaParam)
+    // Salva token e cargo — cargo é usado para checar permissões (ex: deletar evento)
     localStorage.setItem("token", dados.token)
+    localStorage.setItem("cargo", dados.cargo)
     navigate({ to: "/dashboard" })
   }
 
