@@ -1,4 +1,5 @@
 import * as repository from "../repositories/eventoRepository.js";
+import * as presencasRepository from "../repositories/presencasRepository.js";
 import * as err from "../middlewares/errosCustomizados.js";
 
 export async function criarEvento(dados){
@@ -32,6 +33,8 @@ export async function buscarPorId(id){
 }
 
 export async function remover(id){
+    await presencasRepository.deletarPorEvento(id);
+
     const conexao = await repository.remover(id);
     if(!conexao){
         throw new err.NaoEncontrado("não encontrado");

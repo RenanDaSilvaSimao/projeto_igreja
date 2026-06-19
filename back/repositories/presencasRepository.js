@@ -32,3 +32,7 @@ export async function deletarPorMembro(membro_id){
     await pool.query("DELETE FROM presencas WHERE membro_id = $1;", [membro_id]);
 }
 
+export async function deletarPorEvento(evento_id){
+    await pool.query("DELETE FROM presencas WHERE evento_id = $1;", [evento_id]);
+}
+
