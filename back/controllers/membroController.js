@@ -65,39 +65,40 @@ export async function login(req,res,next){
     }
 }
 
-// Ativado pelo link "Aprovar" enviado no e-mail — sem autenticação, o token JWT é a prova
+// Ativado pelo link "Aprovar" — cria o Líder no banco com os dados do token
 export async function aprovar(req, res, next) {
     try {
         const payload = jwt.verify(req.params.token, process.env.JWT_SECRET);
-        await service.aprovarLider(payload.id);
+
+        if(payload._tipo !== "aprovacao_lider"){
+            return res.status(400).send(`<!DOCTYPE html><html><body style="font-family:sans-serif;text-align:center;padding:60px"><h1>Link inválido</h1></body></html>`);
+        }
+
+        await service.criarLiderAprovado(payload);
         return res.send(`<!DOCTYPE html><html><body style="font-family:sans-serif;text-align:center;padding:60px">
-            <h1 style="color:#1a7a4a">✅ Líder aprovado!</h1>
-            <p>O membro foi ativado e já pode acessar o sistema.</p>
+            <h1 style="color:#c85a00">✅ Líder aprovado!</h1>
+            <p><strong>${payload.nome}</strong> foi cadastrado e já pode acessar o sistema.</p>
         </body></html>`);
     } catch (erro) {
         if (erro.name === "JsonWebTokenError" || erro.name === "TokenExpiredError") {
-            return res.status(400).send(`<!DOCTYPE html><html><body style="font-family:sans-serif;text-align:center;padding:60px">
-                <h1>Link inválido ou expirado</h1>
-            </body></html>`);
+            return res.status(400).send(`<!DOCTYPE html><html><body style="font-family:sans-serif;text-align:center;padding:60px"><h1>Link inválido ou expirado</h1></body></html>`);
         }
         next(erro);
     }
 }
 
-// Ativado pelo link "Negar" enviado no e-mail — remove o membro do sistema
+// Ativado pelo link "Negar" — não há nada a deletar, o usuário nunca foi criado
 export async function negar(req, res, next) {
     try {
         const payload = jwt.verify(req.params.token, process.env.JWT_SECRET);
-        await service.deletar(payload.id);
+
         return res.send(`<!DOCTYPE html><html><body style="font-family:sans-serif;text-align:center;padding:60px">
             <h1 style="color:#c0392b">❌ Cadastro negado</h1>
-            <p>O membro foi removido do sistema.</p>
+            <p>O pedido de <strong>${payload.nome || "usuário"}</strong> foi recusado. Nenhum dado foi salvo.</p>
         </body></html>`);
     } catch (erro) {
         if (erro.name === "JsonWebTokenError" || erro.name === "TokenExpiredError") {
-            return res.status(400).send(`<!DOCTYPE html><html><body style="font-family:sans-serif;text-align:center;padding:60px">
-                <h1>Link inválido ou expirado</h1>
-            </body></html>`);
+            return res.status(400).send(`<!DOCTYPE html><html><body style="font-family:sans-serif;text-align:center;padding:60px"><h1>Link inválido ou expirado</h1></body></html>`);
         }
         next(erro);
     }

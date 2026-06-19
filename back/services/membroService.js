@@ -12,32 +12,52 @@ export async function cadastrar(dados){
         throw new DadoDuplicado("Email já existe no banco de dados");
     }
 
-    const senhaHash = await bcrypt.hash(dados.senha, 10);
+    // Líder: NÃO cria no banco agora — codifica os dados no token e envia e-mail
+    // O usuário só é criado se o admin clicar em Aprovar
+    if(dados.cargo === "Líder"){
+        const senhaHash = await bcrypt.hash(dados.senha, 10);
 
-    const newDados = {
-        ...dados,
-        senha: senhaHash,
-        // Líderes começam inativos — precisam de aprovação do admin
-        ativo: dados.cargo === "Líder" ? false : true,
-    }
+        const tokenAprovacao = jwt.sign(
+            {
+                _tipo: "aprovacao_lider", // identifica que é um token de cadastro, não de auth
+                nome: dados.nome,
+                email: dados.email,
+                senhaHash,
+                cargo: dados.cargo,
+                data_nascimento: dados.data_nascimento,
+                telefone: dados.telefone || null,
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: "7d" }
+        );
 
-    const conexao = await repository.cadastrar(newDados);
-
-    // Se for Líder, dispara e-mail de aprovação sem bloquear a resposta
-    if (dados.cargo === "Líder") {
-        const tokenAprovacao = jwt.sign({ id: conexao.id }, process.env.JWT_SECRET, { expiresIn: "7d" });
         enviarAprovacaoLider({ nome: dados.nome, email: dados.email, token: tokenAprovacao })
             .catch((err) => console.error("Erro ao enviar e-mail de aprovação:", err));
+
+        return { aguardandoAprovacao: true };
     }
 
-    return conexao;
+    // Outros cargos: criar normalmente como ativo
+    const senhaHash = await bcrypt.hash(dados.senha, 10);
+    const newDados = { ...dados, senha: senhaHash, ativo: true };
+    return repository.cadastrar(newDados);
 }
 
-// Ativa um Líder após aprovação via link no e-mail
-export async function aprovarLider(id){
-    const membro = await repository.buscarPorId(id);
-    if(!membro) throw new NaoEncontrado("Membro não encontrado");
-    return repository.ativar(id);
+// Cria o Líder no banco após aprovação — os dados vêm do token do e-mail
+export async function criarLiderAprovado(dadosToken){
+    // Proteção contra duplo clique no link de aprovação
+    const existente = await repository.buscarPorEmail(dadosToken.email);
+    if(existente) return existente;
+
+    return repository.cadastrar({
+        nome: dadosToken.nome,
+        email: dadosToken.email,
+        senha: dadosToken.senhaHash, // já hasheada quando o token foi gerado
+        cargo: dadosToken.cargo,
+        data_nascimento: dadosToken.data_nascimento,
+        telefone: dadosToken.telefone,
+        ativo: true,
+    });
 }
 
 export async function atualizar(dados, id){
