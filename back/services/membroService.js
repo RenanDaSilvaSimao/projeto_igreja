@@ -13,9 +13,10 @@ export async function cadastrar(dados){
         throw new DadoDuplicado("Email já existe no banco de dados");
     }
 
-    // Líder: NÃO cria no banco agora — codifica os dados no token e envia e-mail
+    // Cargos de liderança máxima: NÃO cria no banco agora — envia e-mail de aprovação
     // O usuário só é criado se o admin clicar em Aprovar
-    if(dados.cargo === "Líder"){
+    const cargosQueExigemAprovacao = ["Pastor Presidente", "Vice Presidente"];
+    if(cargosQueExigemAprovacao.includes(dados.cargo)){
         const senhaHash = await bcrypt.hash(dados.senha, 10);
 
         const tokenAprovacao = jwt.sign(

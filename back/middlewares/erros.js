@@ -1,12 +1,10 @@
 import { ZodError } from "zod";
 export function capturarErro(erro, req,res,next){
     if(erro instanceof ZodError){
-        return res.status(400).json({erro: erro.errors.map(e=>e.message)});
+        return res.status(400).json({ mensagem: erro.errors.map(e=>e.message).join(", ") });
     }
     if(erro.statusCode){
-       return res.status(erro.statusCode).json({erro: erro.message});
+        return res.status(erro.statusCode).json({ mensagem: erro.message });
     }
-    else{
-        return res.status(500).json({erro: "Erro do servidor"});
-    }
+    return res.status(500).json({ mensagem: "Erro interno do servidor" });
 }

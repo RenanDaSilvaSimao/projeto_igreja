@@ -1,6 +1,9 @@
 // URL base da API — vem do arquivo .env (VITE_API_URL)
 const BASE_URL = import.meta.env.VITE_API_URL
 
+// Cargos que têm permissão de administração na plataforma
+export const CARGOS_PRIVILEGIADOS = ["Pastor Presidente", "Vice Presidente"]
+
 // Monta os headers com o token JWT salvo no localStorage
 // Usado em todas as rotas protegidas (que exigem login)
 function headersAuth() {

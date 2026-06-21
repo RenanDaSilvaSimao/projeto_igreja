@@ -6,7 +6,7 @@ export function verificarToken(req,res,next){
     const token = req.headers.authorization;
 
     if(!token){
-        throw new NaoAutorizado("Token inválido/ausente");
+        return next(new NaoAutorizado("Token inválido/ausente"));
     }
     try{
         const tokenArr = token.split(" ");
@@ -15,6 +15,6 @@ export function verificarToken(req,res,next){
         req.usuario = tokenVerificado;
         next();
     }catch(erro){
-        next(erro);
+        next(new NaoAutorizado("Token inválido ou expirado"));
     }
 }

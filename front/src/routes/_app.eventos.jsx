@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { toast } from "sonner"
-import { listarEventos, cadastrarEvento, deletarEvento, confirmarPresenca, cancelarPresenca } from "@/lib/api"
+import { listarEventos, cadastrarEvento, deletarEvento, confirmarPresenca, cancelarPresenca, CARGOS_PRIVILEGIADOS } from "@/lib/api"
 
 export const Route = createFileRoute("/_app/eventos")({
   component: EventosPage,
@@ -18,8 +18,8 @@ function EventosPage() {
   const [carregando, setCarregando] = useState(true)
   const [modalAberto, setModalAberto] = useState(false)
 
-  // Lê o cargo salvo no login — Líder cria/remove; demais apenas confirmam presença
   const cargo = localStorage.getItem("cargo")
+  const ehPrivilegiado = CARGOS_PRIVILEGIADOS.includes(cargo)
 
   // Estado do formulário de novo evento
   const [form, setForm] = useState({
@@ -122,8 +122,8 @@ function EventosPage() {
           <p className="text-muted-foreground">Encontros, cultos e atividades.</p>
         </div>
 
-        {/* Botão de criar evento — apenas Líderes veem */}
-        {cargo === "Líder" && (
+        {/* Botão de criar evento — apenas Pastor Presidente e Vice Presidente */}
+        {ehPrivilegiado && (
           <Dialog open={modalAberto} onOpenChange={setModalAberto}>
             <DialogTrigger asChild>
               <Button>
@@ -201,7 +201,7 @@ function EventosPage() {
                     <div className="flex-1 p-5 space-y-3">
                       <div className="flex items-start justify-between gap-2">
                         <h3 className="font-bold text-xl leading-tight">{e.nome_evento}</h3>
-                        {cargo === "Líder" && (
+                        {ehPrivilegiado && (
                           <Button
                             variant="ghost"
                             size="icon"

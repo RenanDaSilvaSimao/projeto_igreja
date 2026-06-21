@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { toast } from "sonner"
-import { listarMembros, deletarMembro, alternarAtivo } from "@/lib/api"
+import { listarMembros, deletarMembro, alternarAtivo, CARGOS_PRIVILEGIADOS } from "@/lib/api"
 
 export const Route = createFileRoute("/_app/membros")({
   component: MembrosPage,
@@ -18,8 +18,8 @@ function MembrosPage() {
   const [carregando, setCarregando] = useState(true)
   const [q, setQ] = useState("") // texto de busca
 
-  // Lê o cargo salvo no login — só Líder vê o botão de remover
   const cargo = localStorage.getItem("cargo")
+  const ehPrivilegiado = CARGOS_PRIVILEGIADOS.includes(cargo)
 
   // Busca os membros do back-end quando a página carrega
   useEffect(() => {
@@ -131,7 +131,7 @@ function MembrosPage() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {cargo === "Líder" && (
+                      {ehPrivilegiado && (
                         <div className="flex items-center gap-1">
                           <Button
                             variant="ghost"

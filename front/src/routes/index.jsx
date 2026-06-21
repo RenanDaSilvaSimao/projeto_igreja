@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
-import { login, cadastrarMembro } from "@/lib/api"
+import { login, cadastrarMembro, CARGOS_PRIVILEGIADOS } from "@/lib/api"
 
 export const Route = createFileRoute("/")({
   component: LoginPage,
@@ -73,8 +73,8 @@ function LoginPage() {
 
       await cadastrarMembro(dados)
 
-      // Líderes precisam de aprovação — não tenta logar, mostra aviso
-      if (form.cargo === "Líder") {
+      // Pastor Presidente e Vice Presidente precisam de aprovação
+      if (CARGOS_PRIVILEGIADOS.includes(form.cargo)) {
         toast.success("Conta criada! Aguarde a aprovação do administrador por e-mail.")
         return
       }
@@ -179,12 +179,17 @@ function LoginPage() {
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="Membro">Membro</SelectItem>
-                        <SelectItem value="Líder">Líder</SelectItem>
-                        <SelectItem value="Diácono">Diácono</SelectItem>
-                        <SelectItem value="Ancião">Ancião</SelectItem>
-                        <SelectItem value="Encarregado">Encarregado</SelectItem>
-                        <SelectItem value="Porteiro">Porteiro</SelectItem>
+                        <SelectItem value="Pastor Presidente">Pastor Presidente</SelectItem>
+                        <SelectItem value="Vice Presidente">Vice Presidente</SelectItem>
                         <SelectItem value="Pastor">Pastor</SelectItem>
+                        <SelectItem value="Pastora">Pastora</SelectItem>
+                        <SelectItem value="Evangelista">Evangelista</SelectItem>
+                        <SelectItem value="Presbítero">Presbítero</SelectItem>
+                        <SelectItem value="Missionário">Missionário</SelectItem>
+                        <SelectItem value="Missionária">Missionária</SelectItem>
+                        <SelectItem value="Diácono">Diácono</SelectItem>
+                        <SelectItem value="Diaconisa">Diaconisa</SelectItem>
+                        <SelectItem value="Secretaria">Secretaria</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

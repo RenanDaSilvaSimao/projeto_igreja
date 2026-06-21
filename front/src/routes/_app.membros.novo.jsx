@@ -98,12 +98,17 @@ function NovoMembroPage() {
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Membro">Membro</SelectItem>
-                    <SelectItem value="Líder">Líder</SelectItem>
-                    <SelectItem value="Diácono">Diácono</SelectItem>
-                    <SelectItem value="Ancião">Ancião</SelectItem>
-                    <SelectItem value="Encarregado">Encarregado</SelectItem>
-                    <SelectItem value="Porteiro">Porteiro</SelectItem>
+                    <SelectItem value="Pastor Presidente">Pastor Presidente</SelectItem>
+                    <SelectItem value="Vice Presidente">Vice Presidente</SelectItem>
                     <SelectItem value="Pastor">Pastor</SelectItem>
+                    <SelectItem value="Pastora">Pastora</SelectItem>
+                    <SelectItem value="Evangelista">Evangelista</SelectItem>
+                    <SelectItem value="Presbítero">Presbítero</SelectItem>
+                    <SelectItem value="Missionário">Missionário</SelectItem>
+                    <SelectItem value="Missionária">Missionária</SelectItem>
+                    <SelectItem value="Diácono">Diácono</SelectItem>
+                    <SelectItem value="Diaconisa">Diaconisa</SelectItem>
+                    <SelectItem value="Secretaria">Secretaria</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
