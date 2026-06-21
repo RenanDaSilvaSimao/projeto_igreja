@@ -6,7 +6,7 @@ Sou Renan (também atendo por Francisca em contexto de programação). Tenho TDA
 
 **Meta:** chegar a nível júnior pronto para o mercado, com portfólio sólido de projetos reais e deployados.
 
-**Prontidão atual de mercado:** ~90%
+**Prontidão atual de mercado:** ~92%
 
 **Filosofia de aprendizado:** aprender FAZENDO projetos reais e deployados — não tutoriais, não projetos fictícios. Cada projeto vai para produção.
 
@@ -97,7 +97,7 @@ Ao final de cada etapa do projeto mostrar:
 - ✅ CRUD completo (GET, POST, PATCH, DELETE) com Express + PostgreSQL
 - ✅ Arquitetura em 3 camadas: `controller → service → repository → banco`
 - ✅ Imports com namespace (`import * as`)
-- ✅ Validação com Zod (schemas, `.partial()`, mensagens de erro customizadas)
+- ✅ Validação com Zod (schemas, `.partial()`, `.refine()`, mensagens de erro customizadas)
 - ✅ Status codes HTTP corretos (200, 201, 204, 400, 401, 404, 409, 500)
 - ✅ Diferença entre PUT e PATCH (merge no service)
 - ✅ Middleware de erro centralizado (4 parâmetros no Express)
@@ -108,6 +108,15 @@ Ao final de cada etapa do projeto mostrar:
 - ✅ Middleware de autenticação (extrair token do header `Authorization: Bearer`)
 - ✅ E-mail transacional com Resend SDK
 - ✅ Fluxo de aprovação com JWT como token de confirmação em link de e-mail
+- ✅ SQL com agregação — `COUNT`, `BOOL_OR`, `COALESCE`, `GROUP BY`, `LEFT JOIN` numa query só
+- ✅ Cascade delete manual — deletar filhos antes do pai para evitar FK constraint violation
+- ✅ Rate limiting com `express-rate-limit` (limite de tentativas por IP por janela de tempo)
+- ✅ Headers de segurança HTTP com `helmet`
+- ✅ CORS restrito com função `origin` (whitelist por domínio + padrão `*.vercel.app`)
+- ✅ RBAC com múltiplos cargos privilegiados (array em vez de comparação simples)
+- ✅ Middleware `verificarLider` — busca membro no banco e checa cargo antes de executar rota
+- ✅ Zod `.refine()` para validações customizadas (data futura, intervalo de datas)
+- ✅ Padronização de resposta de erro: sempre `{ mensagem: "..." }` no middleware
 
 ### Front-end
 - ✅ React 19 com Vite (SPA — Single Page Application)
@@ -125,6 +134,10 @@ Ao final de cada etapa do projeto mostrar:
 - ✅ Formulários controlados (controlled inputs com `useState`)
 - ✅ Toast notifications com `sonner`
 - ✅ Modal/Dialog com shadcn/ui
+- ✅ Optimistic update — atualizar estado local sem re-fetch (UX instantânea)
+- ✅ Constante exportada no `api.js` como fonte única da verdade para RBAC (`CARGOS_PRIVILEGIADOS`)
+- ✅ `min` em `datetime-local` para bloquear datas passadas no browser
+- ✅ Lógica de exibição condicional encadeada (ternário em JSX para múltiplos estados)
 
 ### Deploy e produção
 - ✅ Git workflow de deploy: `git add → commit → push → plataforma redeploya automaticamente`
@@ -152,6 +165,9 @@ Ao final de cada etapa do projeto mostrar:
 | Erros silenciosos no painel | `.catch(console.error)` engole o erro sem mostrar ao usuário | Exibir toast de erro nos catches |
 | Login funciona local, falha em prod | Banco de produção vazio — usuário não existe lá | Cadastrar na prod separadamente |
 | `git commit` sem nada para commitar | Arquivo em pasta com `.git` próprio (submodule oculto) | Conferir se há `.git` dentro de subpastas |
+| DELETE de membro/evento falha com FK error | Tabela `presencas` tem FK para ambos — banco bloqueia o DELETE | Deletar filhos (`presencas`) antes de deletar o pai |
+| `failed to fetch` após restringir CORS | `FRONTEND_URL` não estava definida no Railway — servidor bloqueava tudo | Usar função `origin` com `*.vercel.app` como fallback |
+| Email de aprovação mostrava "Líder" hardcoded | Template não recebia o cargo como parâmetro | Passar `cargo` para a função de email e usar no template |
 
 ---
 
@@ -164,11 +180,11 @@ back/
   services/       ← lógica de negócio, lança erros customizados
   repositories/   ← só SQL, sem lógica
   routes/         ← define as rotas e middlewares de cada uma
-  middlewares/    ← autenticacao.js, erros.js, errosCustomizados.js
+  middlewares/    ← autenticacao.js, erros.js, errosCustomizados.js, verificarLider.js
   schemas/        ← validação com Zod
   lib/            ← utilitários (email.js, etc.)
   db.js           ← pool de conexão com PostgreSQL
-  server.js       ← ponto de entrada, registra rotas e middlewares
+  server.js       ← ponto de entrada, registra rotas e middlewares globais
 ```
 
 ### Front-end — estrutura de pastas
@@ -186,7 +202,7 @@ front/src/
     app-sidebar.jsx         ← navegação lateral
     ui/                     ← shadcn/ui (NUNCA editar)
   lib/
-    api.js                  ← todas as funções de fetch centralizadas
+    api.js                  ← todas as funções de fetch + constantes de RBAC
   styles.css                ← tema Tailwind v4 com variáveis CSS
 ```
 
@@ -212,42 +228,138 @@ function headersAuth() {
 }
 ```
 
-### Controle de acesso por cargo (RBAC básico)
+### RBAC — controle de acesso por cargo
 ```js
-// No front: ler do localStorage após login
-const cargo = localStorage.getItem("cargo")
-{cargo === "Líder" && <Button>Remover</Button>}
+// api.js — fonte única da verdade para cargos privilegiados
+export const CARGOS_PRIVILEGIADOS = ["Pastor Presidente", "Vice Presidente", "Secretaria"]
 
-// No login response: service retorna { token, cargo }
+// Em qualquer componente:
+import { CARGOS_PRIVILEGIADOS } from "@/lib/api"
+const cargo = localStorage.getItem("cargo")
+const ehPrivilegiado = CARGOS_PRIVILEGIADOS.includes(cargo)
+{ehPrivilegiado && <Button>Ação restrita</Button>}
+
+// No back-end: verificarLider.js checa no banco (não confia só no token)
+const CARGOS_PRIVILEGIADOS = ["Pastor Presidente", "Vice Presidente", "Secretaria"]
+if (!CARGOS_PRIVILEGIADOS.includes(membro.cargo)) throw new NaoAutorizado(...)
+
+// Login retorna: { token, cargo }
 // localStorage salva os dois separadamente
 // Logout limpa os dois
 ```
 
+### Cascade delete — ordem correta
+```js
+// SEMPRE deletar filhos antes do pai para evitar FK constraint
+// Exemplo: deletar membro
+await presencasRepository.deletarPorMembro(id)  // filhos primeiro
+await repository.deletar(id)                     // pai depois
+
+// Exemplo: deletar evento
+await presencasRepository.deletarPorEvento(id)  // filhos primeiro
+await repository.remover(id)                     // pai depois
+```
+
+### SQL com agregação em uma query só
+```sql
+-- Busca eventos com contagem de presenças e se o usuário confirmou
+SELECT
+  e.*,
+  COUNT(p.membro_id)::int AS total_presencas,
+  COALESCE(BOOL_OR(p.membro_id = $1), false) AS eu_confirmei
+FROM eventos e
+LEFT JOIN presencas p ON p.evento_id = e.id
+GROUP BY e.id
+ORDER BY e.data_evento ASC
+```
+
+### Segurança mínima para produção
+```js
+// server.js
+app.use(helmet())  // headers de segurança HTTP
+
+// CORS com função origin (mais flexível que array)
+function verificarOrigem(origin, callback) {
+  if (!origin) return callback(null, true)
+  if (origin === "http://localhost:5173") return callback(null, true)
+  if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) return callback(null, true)
+  if (origin.endsWith(".vercel.app")) return callback(null, true)
+  callback(new Error("Origem não permitida"))
+}
+app.use(cors({ origin: verificarOrigem }))
+
+// Rate limiting na rota de login
+const limitadorLogin = rateLimit({
+  windowMs: 15 * 60 * 1000,  // 15 minutos
+  max: 10,
+  message: { mensagem: "Muitas tentativas. Tente em 15 minutos." }
+})
+router.post("/membros/login", limitadorLogin, controller.login)
+```
+
+### Optimistic update no React
+```js
+// Atualiza o estado local imediatamente — sem esperar re-fetch
+// Dá sensação de instantâneo para o usuário
+const onConfirmarPresenca = async (eventoId) => {
+  await confirmarPresenca(eventoId)
+  setEventos(prev => prev.map(e =>
+    e.id === eventoId
+      ? { ...e, eu_confirmei: true, total_presencas: e.total_presencas + 1 }
+      : e
+  ))
+}
+```
+
 ---
 
-## PROJETO CONCLUÍDO — SISTEMA DA IGREJA (AD Fogo Para As Nações)
+## PROJETO EM PRODUÇÃO — SISTEMA DA IGREJA (AD Fogo Para As Nações)
 
 ### Stack utilizada
-- **Back-end:** Node.js + Express + PostgreSQL + JWT + bcrypt + Zod + Resend
+- **Back-end:** Node.js + Express 5 + PostgreSQL + JWT + bcrypt + Zod + Resend + Helmet + express-rate-limit
 - **Front-end:** React 19 + Vite + TanStack Router + shadcn/ui + Tailwind v4
 - **Deploy:** Railway (back + banco) + Vercel (front) + GitHub (CI/CD)
 
+### Cargos da igreja e hierarquia de acesso
+```
+Cargos privilegiados (criam/deletam/pausam):
+  Pastor Presidente, Vice Presidente, Secretaria
+
+Cargos comuns (confirmam presença, visualizam):
+  Pastor, Pastora, Evangelista, Presbítero,
+  Missionário, Missionária, Diácono, Diaconisa, Membro
+
+Fluxo de aprovação por e-mail:
+  Pastor Presidente e Vice Presidente e Secretaria → e-mail de aprovação → só entram após aprovação
+  Demais cargos → entram direto após cadastro
+```
+
 ### Funcionalidades entregues
-- ✅ Cadastro de membros com validação Zod
-- ✅ Login com JWT + bcrypt
+- ✅ Cadastro de membros com validação Zod (incluindo data de nascimento com limites)
+- ✅ Login com JWT + bcrypt, verifica campo `ativo`
 - ✅ Painel com estatísticas em tempo real (membros ativos, eventos)
-- ✅ CRUD de membros (listagem, novo, deletar)
-- ✅ CRUD de eventos (listagem, novo, deletar)
-- ✅ Controle de acesso: só Líder pode deletar membros e eventos
-- ✅ Aprovação de novos Líderes por e-mail (Resend) com links JWT de aprovar/negar
+- ✅ CRUD de membros (listagem com busca, deletar)
+- ✅ CRUD de eventos (listagem, criar, deletar)
+- ✅ Controle de acesso: só cargos privilegiados criam/deletam/pausam
+- ✅ Aprovação de cargos privilegiados por e-mail (Resend) com links JWT de aprovar/negar
+- ✅ Presença em eventos — confirmar e cancelar
+- ✅ Contagem de presenças em tempo real nos cards (optimistic update)
+- ✅ Limite de vagas por evento — "Limite atingido" quando cheio
+- ✅ "Tempo esgotado" para eventos passados
+- ✅ Validação de data futura ao criar evento (back + front)
+- ✅ Pausar/reativar membro (campo `ativo`) — inativo não confirma presença
+- ✅ Segurança: helmet, CORS restrito, rate limit no login
 - ✅ Deploy completo em produção (Railway + Vercel)
 - ✅ Tema personalizado: AD Fogo Para As Nações (preto, laranja, amarelo)
 
 ### Lições de arquitetura deste projeto
 - Login deve retornar `{ token, cargo }` — o cargo é necessário para RBAC no front
-- Líderes criados com `ativo = false` até aprovação do admin
+- Cargos privilegiados: nunca comparar com string única — usar array `includes()`
 - Token de e-mail = JWT assinado com JWT_SECRET (sem campo extra no banco)
-- Rotas de aprovação ficam ANTES de `/membros/:id` para não colidir com o param dinâmico
+- Rotas específicas (`/membros/aprovar/:token`) ficam ANTES de rotas com parâmetro genérico (`/membros/:id`)
+- Cascade delete: sempre deletar filhos antes do pai (FK constraint)
+- SQL com JOIN + agregação resolve em 1 query o que seriam N+1 queries no código
+- Erros do middleware devem sempre usar `{ mensagem: "..." }` para bater com o front-end
 
 ---
 
@@ -290,8 +402,9 @@ O que praticar neste projeto:
 
 - ✅ **85%** — JWT + bcrypt + middleware + CRUD completo
 - ✅ **90%** — Front-end React integrado ao back, deploy completo (Railway + Vercel), e-mail transacional, RBAC básico
-- ⬜ **93%** — Testes automatizados (Jest + Supertest)
-- ⬜ **96%** — TypeScript no back-end (ou front)
+- ✅ **92%** — Segurança real em produção (helmet, rate limit, CORS restrito), SQL com agregação, cascade delete, optimistic update, sistema de presenças completo
+- ⬜ **95%** — Testes automatizados (Jest + Supertest)
+- ⬜ **97%** — TypeScript no back-end (ou front)
 - ⬜ **100%** — Projeto vitrine com README, deploy, documentação, simulado técnico
 
 ---
