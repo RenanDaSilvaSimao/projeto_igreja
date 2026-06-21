@@ -7,15 +7,22 @@ import routerEventos from "./routes/eventosRoutes.js";
 import { capturarErro } from "./middlewares/erros.js";
 import routerPresencas from "./routes/presencasRoutes.js";
 
-// Aceita requisições do front em produção (FRONTEND_URL no Railway) e do localhost em dev
-const origensPermitidas = [
-  process.env.FRONTEND_URL,
-  "http://localhost:5173",
-].filter(Boolean);
+function verificarOrigem(origin, callback) {
+  // Sem origem = requisição direta (Postman, Railway health check) — libera
+  if (!origin) return callback(null, true);
+  // Localhost em desenvolvimento
+  if (origin === "http://localhost:5173") return callback(null, true);
+  // URL exata configurada no Railway via variável FRONTEND_URL
+  if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) return callback(null, true);
+  // Qualquer subdomínio do Vercel (cobre previews e produção)
+  if (origin.endsWith(".vercel.app")) return callback(null, true);
+
+  callback(new Error("Origem não permitida"));
+}
 
 const app = express();
 app.use(helmet());
-app.use(cors({ origin: origensPermitidas }));
+app.use(cors({ origin: verificarOrigem }));
 app.use(express.json());
 app.use(routerMembros);
 app.use(routerEventos);
