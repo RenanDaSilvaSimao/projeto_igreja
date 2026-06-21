@@ -1,6 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
-import { Search, UserPlus, Trash2, UserX, UserCheck } from "lucide-react"
+import { Search, Trash2, UserX, UserCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -67,11 +67,6 @@ function MembrosPage() {
           <h1 className="text-3xl">Membros</h1>
           <p className="text-muted-foreground">{membros.length} pessoas na sua comunidade.</p>
         </div>
-        <Button asChild>
-          <Link to="/membros/novo">
-            <UserPlus className="h-4 w-4" /> Novo membro
-          </Link>
-        </Button>
       </div>
 
       <Card className="p-4">
