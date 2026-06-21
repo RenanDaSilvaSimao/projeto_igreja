@@ -15,7 +15,7 @@ export async function cadastrar(dados){
 
     // Cargos de liderança máxima: NÃO cria no banco agora — envia e-mail de aprovação
     // O usuário só é criado se o admin clicar em Aprovar
-    const cargosQueExigemAprovacao = ["Pastor Presidente", "Vice Presidente"];
+    const cargosQueExigemAprovacao = ["Pastor Presidente", "Vice Presidente", "Secretaria"];
     if(cargosQueExigemAprovacao.includes(dados.cargo)){
         const senhaHash = await bcrypt.hash(dados.senha, 10);
 
@@ -33,7 +33,7 @@ export async function cadastrar(dados){
             { expiresIn: "7d" }
         );
 
-        enviarAprovacaoLider({ nome: dados.nome, email: dados.email, token: tokenAprovacao })
+        enviarAprovacaoLider({ nome: dados.nome, email: dados.email, cargo: dados.cargo, token: tokenAprovacao })
             .catch((err) => console.error("Erro ao enviar e-mail de aprovação:", err));
 
         return { aguardandoAprovacao: true };

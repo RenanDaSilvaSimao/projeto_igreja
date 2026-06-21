@@ -1,7 +1,7 @@
 import * as membroRepository from "../repositories/membroRepository.js";
 import { NaoAutorizado } from "./errosCustomizados.js";
 
-const CARGOS_PRIVILEGIADOS = ["Pastor Presidente", "Vice Presidente"];
+const CARGOS_PRIVILEGIADOS = ["Pastor Presidente", "Vice Presidente", "Secretaria"];
 
 export async function verificarLider(req, res, next) {
   try {
