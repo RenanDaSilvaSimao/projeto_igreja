@@ -1,5 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router"
-import { LayoutDashboard, Users, Calendar, LogOut, Church } from "lucide-react"
+import { LayoutDashboard, Users, Calendar, LogOut, Church, Wrench } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -17,6 +17,7 @@ const items = [
   { title: "Painel", url: "/dashboard", icon: LayoutDashboard },
   { title: "Membros", url: "/membros", icon: Users },
   { title: "Eventos", url: "/eventos", icon: Calendar },
+  { title: "Manutenção", url: "/manutencao", icon: Wrench },
 ]
 
 export function AppSidebar() {
