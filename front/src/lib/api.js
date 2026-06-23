@@ -146,31 +146,3 @@ export async function cancelarPresenca(eventoId) {
   })
   return tratarResposta(resposta)
 }
-
-// ─── CONTRIBUIÇÕES ────────────────────────────────────────────────────────────
-
-// Retorna o status do mês atual (total, surplus, meta, bloqueado, jaContribuiu)
-export async function buscarStatusContribuicao() {
-  const resposta = await fetch(`${BASE_URL}/contribuicoes/status`, {
-    headers: headersAuth(),
-  })
-  return tratarResposta(resposta)
-}
-
-// Registra uma contribuição do mês atual — POST /contribuicoes
-export async function registrarContribuicao(valor) {
-  const resposta = await fetch(`${BASE_URL}/contribuicoes`, {
-    method: "POST",
-    headers: headersAuth(),
-    body: JSON.stringify({ valor }),
-  })
-  return tratarResposta(resposta)
-}
-
-// Lista contribuições de um mês/ano — GET /contribuicoes?mes=X&ano=Y (apenas privilegiados)
-export async function listarContribuicoes(mes, ano) {
-  const resposta = await fetch(`${BASE_URL}/contribuicoes?mes=${mes}&ano=${ano}`, {
-    headers: headersAuth(),
-  })
-  return tratarResposta(resposta)
-}

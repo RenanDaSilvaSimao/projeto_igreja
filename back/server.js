@@ -6,7 +6,6 @@ import routerMembros from "./routes/membrosRoutes.js";
 import routerEventos from "./routes/eventosRoutes.js";
 import { capturarErro } from "./middlewares/erros.js";
 import routerPresencas from "./routes/presencasRoutes.js";
-import routerContribuicoes from "./routes/contribuicoesRoutes.js";
 
 function verificarOrigem(origin, callback) {
   // Sem origem = requisição direta (Postman, Railway health check) — libera
@@ -28,7 +27,6 @@ app.use(express.json());
 app.use(routerMembros);
 app.use(routerEventos);
 app.use(routerPresencas);
-app.use(routerContribuicoes);
 app.use(capturarErro);
 
 app.listen(process.env.PORT || 3000, ()=>{
